@@ -15,7 +15,7 @@
 
 # Switch out LFILE for something static to avoid running md5sum and cut, e.g.
 # LFILE=/tmp/one.pid
-LFILE=/tmp/one-`echo "$@" | md5sum | cut -d\  -f1`.pid
+LFILE="/tmp/one-$(echo "$@" | md5sum | cut -d\  -f1).pid"
 if [ -e ${LFILE} ] && kill -0 `cat ${LFILE}`; then
    exit
 fi
