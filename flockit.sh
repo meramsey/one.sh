@@ -15,7 +15,25 @@
 
 # Switch out LFILE for something static to avoid running md5sum and cut, e.g.
 # LFILE=/tmp/flockit-{pid}.pid
-LFILE="/tmp/one-$(echo "$@" | md5sum | cut -d\  -f1).pid"
+LFILE="/tmp/flockit-$(echo "$@" | md5sum | cut -d\  -f1).pid"
+
+
+if ! command -v flock &> /dev/null
+then
+    echo "Warning: flock not installed using one.sh"
+    if [ -e ${LFILE} ] && kill -0 `cat ${LFILE}`; then
+       exit
+    fi
+
+    trap "rm -f ${LFILE}; exit" INT TERM EXIT
+    echo $$ > ${LFILE}
+    
+    $@
+
+    rm -f ${LFILE}
+fi
 
 # /usr/bin/flock -w 0 /tmp/flockit-{pid}.pid <command>
 flock -w 0 ${LFILE} $@
+
+
